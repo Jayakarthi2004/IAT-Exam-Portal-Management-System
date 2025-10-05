@@ -1,0 +1,1270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>IAT EXAM PORTAL MANAGEMENT SYSTEMS</title>
+<style>
+  /* Basic visual styling */
+  :root{ --primary:#0b63f6; --accent:#0b63f6; --muted:#666; --card:#fff; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#f2f6fb;}
+  body{
+    background-image: url('college_building.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  header{
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.95));
+    padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #ddd;
+  }
+  header img{ height:68px; width:auto; }
+  .hdr-text{ text-align:center; flex:1; line-height:1.05; }
+  .hdr-text h1{ margin:0; font-size:18px; letter-spacing:0.6px; }
+  .hdr-text p{ margin:2px 0; font-size:12px; color:#333; }
+  main{ padding:18px; display:flex; justify-content:center; }
+  .card{ width:100%; max-width:1200px; background:rgba(255,255,255,0.95); border-radius:12px; padding:18px; box-shadow:0 8px 30px rgba(2,6,23,0.08); }
+  .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  button{ background:var(--primary); color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+  button.secondary{ background:#e6eefb; color:#024b9a; }
+  button.danger{ background:#ff5959; }
+  input,select,textarea{ padding:8px; border-radius:6px; border:1px solid #cfcfcf; }
+  .small{ font-size:13px; color:var(--muted); }
+  table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+  th,td{ border:1px solid #e6e6e6; padding:8px; text-align:left; vertical-align:middle; }
+  .hidden{ display:none; }
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .center{ text-align:center; }
+  label{ font-size:13px; color:#222; display:block; margin-top:8px; }
+  .muted{ color:var(--muted); font-size:13px; }
+  .form-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  @media (max-width:900px){ .form-grid{ grid-template-columns:1fr } header{flex-direction:column; align-items:flex-start} header img{ position:static } .hdr-text{text-align:left} }
+  .table-scroll{ max-height:360px; overflow:auto; }
+
+  @media print {
+    button { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="College Logo" onerror="this.style.display='none'">
+  <div class="hdr-text">
+    <h1>V V COLLEGE OF ENGINEERING</h1>
+    <p>V V Nagar, Tisayanvilai, Tirunelveli District, Tamil Nadu - 627657</p>
+    <p>(Approved by AICTE, New Delhi and Affiliated to Anna University, Chennai)</p>
+    <p>Telephone: 04637 - 273312-15 (4 lines), 273412, 272467</p>
+    <p>Email: info@vvcoe.org | Website: www.vvcoe.org</p>
+    <p style="font-size:22px; font-weight:bold; text-align:center; margin-top:9px;">Created by JAYAKARTHI S R (III — ECE)</p>
+  </div>
+</header>
+
+<main>
+  <div class="card" id="app">
+    <!-- INITIAL -->
+    <div id="initial" >
+      <h2 style="text-align:center">IAT EXAM PORTAL MANAGEMENT SYSTEMS</h2>
+      <p class="small center">For HOD, Faculty & Exam Cell. Students view-only.</p>
+      <div class="row" style="margin-top:12px; justify-content:center;">
+        <button onclick="nav.showLogin()">Login</button>
+        <button onclick="nav.showSignup()">Sign Up</button>
+        <button onclick="ui.showHelp()">Help</button>
+        <button onclick="ui.resetPassword()">Reset Password</button>
+        <button onclick="ui.viewLS()">View Local Storage</button>
+        <button class="secondary" onclick="data.clearMarksOnly()">Clear Marks Only</button>
+      </div>
+      <div class="small muted" style="margin-top:12px">
+        Notes: HOD credentials are hard-coded in the app. HOD can add/edit/delete staff & students.
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login" class="hidden">
+      <h3>Login</h3>
+      <div class="form-grid">
+        <div>
+          <label>Username</label>
+          <input id="login_username" placeholder="e.g. HOD_ECE / FECE01 / R24EC001">
+        </div>
+        <div>
+          <label>Password</label>
+          <input id="login_password" type="password">
+        </div>
+      </div>
+      <div class="controls">
+        <button onclick="auth.login()">Login</button>
+        <button class="secondary" onclick="nav.back()">Cancel</button>
+      </div>
+      <div id="loginMsg" class="small muted"></div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signup" class="hidden">
+      <h3>Sign Up</h3>
+      <label>Role</label>
+      <select id="signup_role" onchange="ui.renderSignup()">
+        <option value="">--Select--</option>
+        <option value="FACULTY">Faculty</option>
+        <option value="STUDENT">Student</option>
+      </select>
+      <div id="signupForm" style="margin-top:8px"></div>
+      <div class="controls" style="margin-top:8px">
+        <button class="secondary" onclick="nav.back()">Cancel</button>
+      </div>
+      <div id="signupMsg" class="small muted"></div>
+    </div>
+
+    <!-- HOD DASHBOARD -->
+    <div id="hod" class="hidden">
+      <h3>HOD Dashboard</h3>
+      <div class="row">
+        <button onclick="hod.showManageUsers()">Manage Staff/Students</button>
+        <button onclick="hod.showSubjects()">Subjects</button>
+        <button onclick="hod.showMappings()">Subject Handling Map</button>
+        <button onclick="hod.showConsolidation()">Consolidation Marksheet Preview</button>
+        <button onclick="hod.showProgress()">Progress Card Preview</button>
+        <button class="secondary" onclick="hod.showLogs()">Activity Log</button>
+        <button class="danger" onclick="auth.logout()">Logout</button>
+      </div>
+      <div id="hodArea" style="margin-top:12px"></div>
+    </div>
+
+    <!-- FACULTY DASHBOARD -->
+    <div id="faculty" class="hidden">
+      <h3 id="facultyTitle">Faculty Dashboard</h3>
+      <div class="row">
+        <label>Exam Type</label>
+        <select id="faculty_exam" onchange="faculty.setExam()">
+          <option value="IAT1">INTERNAL ASSESSMENT TEST - 1</option>
+          <option value="IAT2">INTERNAL ASSESSMENT TEST - 2</option>
+        </select>
+        <button onclick="faculty.manageAssigned()">Assigned Subjects</button>
+        <button onclick="faculty.showProgress()">Progress Card Preview</button>
+        <button onclick="faculty.showActivityLog()" class="secondary">Activity Log</button>
+        <button class="danger" onclick="auth.logout()">Logout</button>
+      </div>
+      <div id="facultyArea" style="margin-top:12px"></div>
+    </div>
+
+    <!-- STUDENT DASHBOARD -->
+    <div id="student" class="hidden">
+      <h3 id="studentTitle">Student Dashboard</h3>
+      <div class="row">
+        <label>Exam Type</label>
+        <select id="student_exam">
+          <option value="IAT1">INTERNAL ASSESSMENT TEST - 1</option>
+          <option value="IAT2">INTERNAL ASSESSMENT TEST - 2</option>
+        </select>
+        <button onclick="student.viewProgress()">View Progress Card</button>
+        <button onclick="student.viewUniversityInternal()">View University Internal</button>
+        <button class="danger" onclick="auth.logout()">Logout</button>
+      </div>
+      <div id="studentArea" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Add to your home page HTML -->
+    <div style="margin:20px;text-align:center">
+      <button onclick="importlocalStorage()" style="padding:8px 16px;margin-right:10px;">Import Local Storage</button>
+      <button onclick="exportlocalStorage()" style="padding:8px 16px;">Export Local Storage</button>
+    </div>
+    <input type="file" id="importFile" style="display:none" accept=".json" onchange="handleImport(event)">
+  </div>
+</main>
+
+<footer style="text-align:center;color:#666;padding:8px;">© V V College of Engineering</footer>
+
+<script>
+/* ==========================================================
+   Data model and utilities (localStorage-backed)
+   Keys:
+    - staffUsers: array of staff
+    - studentUsers: array of students
+    - subjects: array of subjects
+    - mappings: array of mapping objects
+    - marks: object { IAT1: { subjectCode: { meta, students }}, IAT2: {...} }
+    - activityLog: array of logs
+   HOD credentials are hard-coded below (department-wise)
+   ========================================================== */
+
+const HODS = [
+  { username: 'HOD_ECE', password: 'hod_ece@123', dept:'ECE', name:'HOD ECE' },
+  { username: 'HOD_CSE', password: 'hod_cse@123', dept:'CSE', name:'HOD CSE' }
+];
+
+// Basic util functions
+const util = {
+  now(){ return new Date().toISOString(); },
+  uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,10); },
+  save(key, value){ localStorage.setItem(key, JSON.stringify(value)); },
+  load(key, fallback){ const v = localStorage.getItem(key); return v ? JSON.parse(v) : (fallback===undefined? null : fallback); },
+  ensure(){
+    if(!localStorage.getItem('staffUsers')) util.save('staffUsers', []);
+    if(!localStorage.getItem('studentUsers')) util.save('studentUsers', []);
+    if(!localStorage.getItem('subjects')) util.save('subjects', []);
+    if(!localStorage.getItem('mappings')) util.save('mappings', []);
+    if(!localStorage.getItem('marks')) util.save('marks', { IAT1:{}, IAT2:{} });
+    if(!localStorage.getItem('activityLog')) util.save('activityLog', []);
+  },
+  pushLog(userId, role, action, details){
+    const arr = util.load('activityLog', []);
+    arr.unshift({ timestamp: util.now(), userId, role, action, details });
+    util.save('activityLog', arr);
+  }
+};
+util.ensure();
+
+/* --------------------
+   Navigation helpers
+   -------------------- */
+const nav = {
+  hideAll(){
+    ['initial','login','signup','hod','faculty','student'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+    document.getElementById('hodArea').innerHTML='';
+    document.getElementById('facultyArea').innerHTML='';
+    document.getElementById('studentArea').innerHTML='';
+  },
+  back(){ this.hideAll(); document.getElementById('initial').classList.remove('hidden'); },
+  showLogin(){ this.hideAll(); document.getElementById('login').classList.remove('hidden'); },
+  showSignup(){ this.hideAll(); document.getElementById('signup').classList.remove('hidden'); },
+  showHOD(){ this.hideAll(); document.getElementById('hod').classList.remove('hidden'); },
+  showFaculty(){ this.hideAll(); document.getElementById('faculty').classList.remove('hidden'); },
+  showStudent(){ this.hideAll(); document.getElementById('student').classList.remove('hidden'); }
+};
+
+/* --------------------
+   Auth & Session
+   -------------------- */
+const session = {
+  set(obj){ sessionStorage.setItem('iat_session', JSON.stringify(obj)); },
+  get(){ const v=sessionStorage.getItem('iat_session'); return v?JSON.parse(v):null; },
+  clear(){ sessionStorage.removeItem('iat_session'); }
+};
+
+const auth = {
+  login(){
+    const u = document.getElementById('login_username').value.trim();
+    const p = document.getElementById('login_password').value;
+    const msg = document.getElementById('loginMsg');
+    msg.textContent = '';
+    if(!u || !p){ msg.textContent = 'Enter username and password'; return; }
+
+    // 1. check HOD (hard-coded)
+    const hod = HODS.find(h=>h.username===u && h.password===p);
+    if(hod){
+      session.set({ id: hod.username, role: 'HOD', name: hod.name, dept: hod.dept });
+      util.pushLog(hod.username,'HOD','LOGIN','HOD login');
+      nav.showHOD();
+      hod.renderMain();
+      return;
+    }
+
+    // 2. staff
+    const staff = util.load('staffUsers', []);
+    const s = staff.find(x => x.staffId === u && x.password === p);
+    if(s){
+      session.set({ id: s.staffId, role: 'FACULTY', name: s.name, dept: s.dept });
+      util.pushLog(s.staffId,'FACULTY','LOGIN','Staff login');
+      nav.showFaculty();
+      faculty.renderMain();
+      return;
+    }
+
+    // 3. student
+    const students = util.load('studentUsers', []);
+    const st = students.find(x => x.studentId === u && x.password === p);
+    if(st){
+      session.set({ id: st.studentId, role: 'STUDENT', name: st.name, branch: st.branch });
+      util.pushLog(st.studentId,'STUDENT','LOGIN','Student login');
+      nav.showStudent();
+      student.renderMain();
+      return;
+    }
+
+    msg.textContent = 'Invalid credentials';
+  },
+
+  logout(){
+    const s = session.get();
+    if(s) util.pushLog(s.id, s.role, 'LOGOUT', 'User logged out');
+    session.clear();
+    nav.back();
+    alert('Logged out');
+  }
+};
+
+/* --------------------
+   UI helpers for signup, reset pwd, view LS, etc.
+   -------------------- */
+const ui = {
+  showHelp(){
+    alert("📘 IAT CONSOLIDATION MARKSHEET & PROGRESS CARD GENERATOR - HELP MENU 📘\n\nWelcome to the official IAT Consolidation Marksheet and Progress Card Generator.\nThis system is mainly designed for the HOD, Faculty, and Students of V V College of Engineering.\n\n🔹 PURPOSE:\nThe system helps manage Internal Assessment Tests (IAT 1 & IAT 2), generate Consolidation Marksheet, Progress Card, and University Internal Marks automatically.\nIt allows faculty to enter student marks, and HODs to review and approve, while students can view their results.\n\n🔹 LOGIN OPTIONS:\n- HOD Login: Use department-wise fixed credentials.\n- Faculty Login: Use Staff ID and password created during sign-up.\n- Student Login: Use Student ID and password created during sign-up.\n\n🔹 SIGN-UP PROCESS:\nFaculty Sign-Up Fields:\n1. Staff ID\n2. Password\n3. Staff Name\n4. Department\n5. Designation\n\nStudent Sign-Up Fields:\n1. Student ID\n2. Password\n3. Student Name\n4. Year\n5. Semester\n6. Degree\n7. Branch\n8. Batch\n\n🔹 HOD DASHBOARD:\n1. Consolidation Marksheet – View faculty-generated marksheets.\n2. Progress Card – View student progress reports.\n3. Subjects – Add, Modify, or Remove subjects (with respect to Year, Semester, and Branch).\n4. Subject Handling Map – Assign subjects to faculty (editable and removable anytime).\n\n🔹 FACULTY DASHBOARD:\n1. Consolidation Marksheet – Enter and manage student marks.\n2. Progress Card – Generate progress card for students.\n3. University Internal Marks – View internal marks (40%) and expected external marks (out of 100).\n4. Activity Log – View log of all activities and actions performed.\n\n🔹 STUDENT DASHBOARD:\n1. Progress Card – View IAT 1 and IAT 2 progress cards.\n2. University Internal Marks – View internal marks generated by faculty.\n\n🔹 MARK CALCULATION LOGIC:\n1. Cycle Test 1 & 2 – Out of 20 each, average converted to percentage.\n2. Assignment – Out of 15, converted to percentage.\n3. Seminar – Out of 10, converted to percentage.\n4. IAT Exam – Out of 50, converted to percentage.\n5. Attendance – If attendance ≥ 90 and total score < 75, then +25 marks added (Boost Applied).\n\n🔹 OUTPUT FORMATS:\nAll previews (Consolidation Marksheet, Progress Card, and University Internal Marks) include college header, logo, and signature section.\nFaculty can print preview as PDF directly (not full browser window).\nStudents can only view their results — no editing allowed.\n\n🔹 STORAGE AND DATA:\n- Data is temporarily stored in Local Storage.\n- Faculty and Students can export or import data if needed for transfer between systems.\n- Clearing marks will not erase login credentials.\n\n🔹 PROFILE EDIT OPTIONS:\n- Students can edit their profile (especially when promoted to next year or semester).\n- Faculty can delete a student account permanently if required.\n\n🔹 GENERAL INSTRUCTIONS:\n1. Always logout properly after use.\n2. Ensure correct Year, Semester, Degree, and Branch are selected before entering marks.\n3. Check that HOD has assigned subjects before faculty attempts to generate marks.\n4. For issues, re-login and verify data in local storage.\n\n💡 TIP:\nUse Chrome browser for best performance. Avoid pressing Ctrl+P from entire page — use Print button in preview section only.\n\n📞 For any technical support, contact Exam Cell Department of V V College of Engineering.\n\n© V V College of Engineering | Tisayanvilai, Tirunelveli District, Tamil Nadu - 627657");
+  },
+
+  renderSignup(){
+    const role = document.getElementById('signup_role').value;
+    const cont = document.getElementById('signupForm');
+    cont.innerHTML = '';
+    document.getElementById('signupMsg').textContent = '';
+    if(role === 'FACULTY'){
+      cont.innerHTML = `
+        <label>Staff ID</label><input id="su_staffId" placeholder="FECE01">
+        <label>Password</label><input id="su_staffPw" type="password">
+        <label>Name</label><input id="su_staffName">
+        <label>Department</label>
+        <select id="su_staffDept"><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select>
+        <label>Designation</label>
+        <select id="su_staffDes"><option>Assistant Professor</option><option>Associate Professor</option><option>Professor</option><option>Teaching Associate</option></select>
+        <div class="controls"><button onclick="ui.signupFaculty()">Create Faculty</button></div>
+      `;
+    } else if(role === 'STUDENT'){
+      cont.innerHTML = `
+        <label>Student ID</label><input id="su_studentId" placeholder="R23EC018">
+        <label>Register No</label><input id="su_regNo" placeholder="953423106018">
+        <label>Password</label><input id="su_studentPw" type="password">
+        <label>Name</label><input id="su_studentName">
+        <div class="form-grid">
+          <div><label>Year</label><select id="su_year"><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+          <div><label>Semester</label><select id="su_sem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Degree</label><select id="su_deg"><option>B.E.</option><option>B.Tech</option></select></div>
+          <div><label>Branch</label><select id="su_branch"><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select></div>
+        </div>
+        <label>Batch</label><input id="su_batch" placeholder="2023-2027">
+        <div class="controls"><button onclick="ui.signupStudent()">Create Student</button></div>
+      `;
+    }
+  },
+
+  signupFaculty(){
+    const id = document.getElementById('su_staffId').value.trim();
+    const pw = document.getElementById('su_staffPw').value;
+    const name = document.getElementById('su_staffName').value.trim();
+    const dept = document.getElementById('su_staffDept').value;
+    const des = document.getElementById('su_staffDes').value;
+    if(!id || !pw || !name){ document.getElementById('signupMsg').textContent='Fill required'; return; }
+    const arr = util.load('staffUsers', []);
+    if(arr.find(s=>s.staffId===id)){ document.getElementById('signupMsg').textContent='Staff ID exists'; return; }
+    arr.push({ staffId:id, password:pw, name, dept, designation:des, createdAt:util.now() });
+    util.save('staffUsers', arr);
+    util.pushLog(id,'FACULTY','CREATE_ACCOUNT','Created staff via signup');
+    document.getElementById('signupMsg').textContent='Faculty created. Login now.';
+  },
+
+  signupStudent(){
+    const id = document.getElementById('su_studentId').value.trim();
+    const reg = document.getElementById('su_regNo').value.trim();
+    const pw = document.getElementById('su_studentPw').value;
+    const name = document.getElementById('su_studentName').value.trim();
+    const year = document.getElementById('su_year').value;
+    const sem = document.getElementById('su_sem').value;
+    const deg = document.getElementById('su_deg').value;
+    const branch = document.getElementById('su_branch').value;
+    const batch = document.getElementById('su_batch').value;
+    if(!id || !reg || !pw || !name){ document.getElementById('signupMsg').textContent='Fill required'; return; }
+    const arr = util.load('studentUsers', []);
+    if(arr.find(s=>s.studentId===id || s.regNo===reg)){ document.getElementById('signupMsg').textContent='Student exists'; return; }
+    arr.push({ studentId:id, regNo:reg, password:pw, name, year, semester:sem, degree:deg, branch, batch, createdAt:util.now() });
+    util.save('studentUsers', arr);
+    util.pushLog(id,'STUDENT','CREATE_ACCOUNT','Created student via signup');
+    document.getElementById('signupMsg').textContent='Student created. Login now.';
+  },
+
+  resetPassword(){
+    const uname = prompt('Enter username (staff/student)');
+    if(!uname) return;
+    const type = prompt('Type "staff" or "student"').toLowerCase();
+    if(type !== 'staff' && type !== 'student'){ alert('Invalid type'); return; }
+    const oldp = prompt('Old password');
+    const newp = prompt('New password');
+    if(!newp) return;
+    if(type==='staff'){
+      const arr = util.load('staffUsers', []);
+      const idx = arr.findIndex(s=>s.staffId===uname && s.password===oldp);
+      if(idx===-1){ alert('Invalid credentials'); return; }
+      arr[idx].password = newp; util.save('staffUsers', arr);
+      util.pushLog(uname,'FACULTY','RESET_PASSWORD','Changed password');
+      alert('Password changed');
+    } else {
+      const arr = util.load('studentUsers', []);
+      const idx = arr.findIndex(s=>s.studentId===uname && s.password===oldp);
+      if(idx===-1){ alert('Invalid credentials'); return; }
+      arr[idx].password = newp; util.save('studentUsers', arr);
+      util.pushLog(uname,'STUDENT','RESET_PASSWORD','Changed password');
+      alert('Password changed');
+    }
+  },
+
+  viewLS(){
+    const data = {
+      staffUsers: util.load('staffUsers', []),
+      studentUsers: util.load('studentUsers', []),
+      subjects: util.load('subjects', []),
+      mappings: util.load('mappings', []),
+      marks: util.load('marks', { IAT1:{}, IAT2:{} }),
+      activityLog: util.load('activityLog', [])
+    };
+    const w = window.open('', '_blank', 'width=900,height=700');
+    w.document.write('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+    w.document.close();
+  }
+};
+
+/* --------------------
+   Data management: clear marks only, promotions, deletions
+   -------------------- */
+const data = {
+  clearMarksOnly(){
+    if(!confirm('Clear all marks (IAT1 & IAT2) but keep users, subjects, mappings?')) return;
+    util.save('marks', { IAT1:{}, IAT2:{} });
+    util.pushLog('system','SYSTEM','CLEAR_MARKS','Cleared all marks');
+    alert('All marks cleared.');
+  },
+
+  // Promote students (bulk or single)
+  promoteStudents({ studentIds, incYear=false, incSemester=false }){
+    // incYear: I->II->III->IV ; incSemester: numeric sem +1
+    const arr = util.load('studentUsers', []);
+    studentIds.forEach(sid=>{
+      const idx = arr.findIndex(x=>x.studentId===sid);
+      if(idx!==-1){
+        // year promotion
+        if(incYear){
+          const order = ['I','II','III','IV'];
+          const cur = arr[idx].year;
+          const pos = order.indexOf(cur);
+          if(pos < order.length-1) arr[idx].year = order[pos+1];
+        }
+        if(incSemester){
+          let sem = Number(arr[idx].semester) || 1;
+          if(sem < 8) sem = sem + 1;
+          arr[idx].semester = String(sem);
+        }
+        util.pushLog(sid,'HOD','PROMOTE_STUDENT',`Promoted ${sid}`);
+      }
+    });
+    util.save('studentUsers', arr);
+    alert('Promotion applied.');
+  },
+
+  deleteStudent(studentId, byWho){
+    if(!confirm(`Delete student ${studentId} permanently? This removes account and all links.`)) return;
+    let arr = util.load('studentUsers', []);
+    arr = arr.filter(s=>s.studentId !== studentId);
+    util.save('studentUsers', arr);
+    // remove marks entries referencing the student
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    ['IAT1','IAT2'].forEach(ex=>{
+      Object.keys(marks[ex]).forEach(sub=>{
+        if(marks[ex][sub].students && marks[ex][sub].students[studentId]) delete marks[ex][sub].students[studentId];
+      });
+    });
+    util.save('marks', marks);
+    util.pushLog(byWho || 'unknown','HOD','DELETE_STUDENT',`Deleted student ${studentId}`);
+    alert('Student deleted.');
+  }
+};
+
+/* --------------------
+   HOD behavior & UI
+   -------------------- */
+const hod = {
+  renderMain(){ // called on HOD login
+    this.renderManageUsers();
+  },
+
+  showManageUsers(){
+    this.renderManageUsers();
+  },
+
+  renderManageUsers(){
+    const area = document.getElementById('hodArea');
+    const staff = util.load('staffUsers', []);
+    const students = util.load('studentUsers', []);
+    area.innerHTML = `
+      <h4>Manage Staff</h4>
+      <div class="form-grid">
+        <div><label>Staff ID</label><input id="hod_staffId"></div>
+        <div><label>Name</label><input id="hod_staffName"></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Password</label><input id="hod_staffPw" type="password"></div>
+        <div><label>Department</label><select id="hod_staffDept"><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select></div>
+      </div>
+      <div class="controls"><button onclick="hod.addStaff()">Add Staff</button></div>
+      <div id="hodStaffList" style="margin-top:8px"></div>
+      <hr>
+      <h4>Manage Students</h4>
+      <div class="form-grid">
+        <div><label>Student ID</label><input id="hod_stuId"></div>
+        <div><label>Register No</label><input id="hod_stuReg"></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Password</label><input id="hod_stuPw" type="password"></div>
+        <div><label>Name</label><input id="hod_stuName"></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Year</label><select id="hod_stuYear"><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+        <div><label>Semester</label><select id="hod_stuSem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Degree</label><select id="hod_stuDeg"><option>B.E.</option><option>B.Tech</option></select></div>
+        <div><label>Branch</label><select id="hod_stuBranch"><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select></div>
+      </div>
+      <label>Batch</label><input id="hod_stuBatch" placeholder="2024-2028">
+      <div class="controls"><button onclick="hod.addStudent()">Add Student</button> <button onclick="hod.renderStudentsList()" class="secondary">Refresh Student List</button></div>
+      <div id="hodStudentList" style="margin-top:8px"></div>
+      <hr>
+      <div class="controls"><button onclick="hod.showPromoteUI()">Bulk Promote Students</button></div>
+    `;
+    this.renderStaffList();
+    this.renderStudentsList();
+  },
+
+  addStaff(){
+    const id = document.getElementById('hod_staffId').value.trim();
+    const pw = document.getElementById('hod_staffPw').value;
+    const name = document.getElementById('hod_staffName').value.trim();
+    const dept = document.getElementById('hod_staffDept').value;
+    if(!id || !pw || !name){ alert('Fill required staff fields'); return; }
+    const arr = util.load('staffUsers', []);
+    if(arr.find(x=>x.staffId===id)){ alert('Staff exists'); return; }
+    arr.push({ staffId:id, password:pw, name, dept, designation:'', createdAt:util.now() });
+    util.save('staffUsers', arr);
+    util.pushLog(session.get()?.id||'HOD','HOD','ADD_STAFF',`Added staff ${id}`);
+    this.renderStaffList();
+    alert('Staff added');
+  },
+
+  renderStaffList(){
+    const arr = util.load('staffUsers', []);
+    const el = document.getElementById('hodStaffList');
+    if(!arr.length){ el.innerHTML = '<div class="muted">No staff</div>'; return; }
+    let html = '<table><thead><tr><th>Staff ID</th><th>Name</th><th>Dept</th><th>Actions</th></tr></thead><tbody>';
+    arr.forEach(s=>{
+      html += `<tr><td>${s.staffId}</td><td>${s.name}</td><td>${s.dept}</td>
+        <td>
+          <button onclick="hod.editStaff('${s.staffId}')">Edit</button>
+          <button class="danger" onclick="hod.deleteStaff('${s.staffId}')">Delete</button>
+        </td></tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  },
+
+  editStaff(staffId){
+    const arr = util.load('staffUsers', []);
+    const idx = arr.findIndex(s=>s.staffId===staffId);
+    if(idx===-1) return alert('Staff not found');
+    const s = arr[idx];
+    const name = prompt('Name', s.name);
+    if(name===null) return;
+    const dept = prompt('Department', s.dept);
+    if(dept===null) return;
+    arr[idx].name = name.trim() || s.name;
+    arr[idx].dept = dept.trim() || s.dept;
+    util.save('staffUsers', arr);
+    util.pushLog(session.get()?.id||'HOD','HOD','EDIT_STAFF',`Edited ${staffId}`);
+    this.renderStaffList();
+  },
+
+  deleteStaff(staffId){
+    if(!confirm('Delete staff permanently?')) return;
+    let arr = util.load('staffUsers', []);
+    arr = arr.filter(s=>s.staffId !== staffId);
+    util.save('staffUsers', arr);
+    // remove mappings where this staff was assigned
+    let maps = util.load('mappings', []);
+    maps = maps.filter(m=>m.staffId !== staffId);
+    util.save('mappings', maps);
+    util.pushLog(session.get()?.id||'HOD','HOD','DELETE_STAFF',`Deleted ${staffId}`);
+    this.renderStaffList();
+    alert('Staff deleted');
+  },
+
+  addStudent(){
+    const id = document.getElementById('hod_stuId').value.trim();
+    const reg = document.getElementById('hod_stuReg').value.trim();
+    const pw = document.getElementById('hod_stuPw').value;
+    const name = document.getElementById('hod_stuName').value.trim();
+    const year = document.getElementById('hod_stuYear').value;
+    const sem = document.getElementById('hod_stuSem').value;
+    const deg = document.getElementById('hod_stuDeg').value;
+    const branch = document.getElementById('hod_stuBranch').value;
+    const batch = document.getElementById('hod_stuBatch').value;
+    if(!id || !reg || !pw || !name){ alert('Fill required fields'); return; }
+    const arr = util.load('studentUsers', []);
+    if(arr.find(s=>s.studentId===id || s.regNo===reg)){ alert('Student exists'); return; }
+    arr.push({ studentId:id, regNo:reg, password:pw, name, year, semester:sem, degree:deg, branch, batch, createdAt:util.now() });
+    util.save('studentUsers', arr);
+    util.pushLog(session.get()?.id||'HOD','HOD','ADD_STUDENT',`Added ${id}`);
+    this.renderStudentsList();
+    alert('Student added');
+  },
+
+  renderStudentsList(){
+    const arr = util.load('studentUsers', []);
+    const el = document.getElementById('hodStudentList');
+    if(!arr.length){ el.innerHTML = '<div class="muted">No students</div>'; return; }
+    let html = '<table><thead><tr><th>Student ID</th><th>Reg No</th><th>Name</th><th>Year</th><th>Sem</th><th>Branch</th><th>Actions</th></tr></thead><tbody>';
+    arr.forEach(s=>{
+      html += `<tr><td>${s.studentId}</td><td>${s.regNo}</td><td>${s.name}</td><td>${s.year}</td><td>${s.semester}</td><td>${s.branch}</td>
+        <td>
+          <button onclick="hod.editStudent('${s.studentId}')">Edit</button>
+          <button class="danger" onclick="data.deleteStudent('${s.studentId}','${session.get()?.id||'HOD'}')">Delete</button>
+        </td></tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  },
+
+  editStudent(studentId){
+    const arr = util.load('studentUsers', []);
+    const idx = arr.findIndex(s=>s.studentId===studentId);
+    if(idx===-1) return alert('Student not found');
+    const s = arr[idx];
+    const name = prompt('Name', s.name);
+    if(name===null) return;
+    const year = prompt('Year (I/II/III/IV)', s.year);
+    if(year===null) return;
+    const sem = prompt('Semester (1-8)', s.semester);
+    if(sem===null) return;
+    const branch = prompt('Branch', s.branch);
+    if(branch===null) return;
+    arr[idx].name = name.trim() || s.name;
+    arr[idx].year = year || s.year;
+    arr[idx].semester = String(sem) || s.semester;
+    arr[idx].branch = branch || s.branch;
+    util.save('studentUsers', arr);
+    util.pushLog(session.get()?.id||'HOD','HOD','EDIT_STUDENT',`Edited ${studentId}`);
+    this.renderStudentsList();
+    alert('Student updated');
+  },
+
+  showPromoteUI(){
+    const area = document.getElementById('hodArea');
+    area.innerHTML = `
+      <h4>Bulk Promote Students</h4>
+      <div class="muted">Choose filter (year/branch/semester) to promote selected students</div>
+      <div class="form-grid">
+        <div><label>From Year</label><select id="promo_fromYear"><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+        <div><label>From Semester</label><select id="promo_fromSem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+        <div><label>Branch</label><select id="promo_branch"><option value="">All</option><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select></div>
+        <div><label>Promotion Action</label><select id="promo_action"><option value="year">Increase Year</option><option value="semester">Increase Semester</option><option value="both">Both</option></select></div>
+      </div>
+      <div class="controls"><button onclick="hod.performBulkPromote()">Promote</button> <button class="secondary" onclick="hod.renderManageUsers()">Back</button></div>
+    `;
+  },
+
+  performBulkPromote(){
+    const fYear = document.getElementById('promo_fromYear').value;
+    const fSem = document.getElementById('promo_fromSem').value;
+    const branch = document.getElementById('promo_branch').value;
+    const action = document.getElementById('promo_action').value;
+    const arr = util.load('studentUsers', []);
+    const toPromote = arr.filter(s => s.year === fYear && s.semester === String(fSem) && (branch? s.branch===branch : true)).map(s => s.studentId);
+    if(!toPromote.length) return alert('No students match filter');
+    const incYear = action === 'year' || action === 'both';
+    const incSemester = action === 'semester' || action === 'both';
+    data.promoteStudents({ studentIds: toPromote, incYear, incSemester });
+    hod.renderStudentsList();
+  },
+
+  /* Consolidation & Progress preview inputs for HOD: */
+  showConsolidation(){
+    const area = document.getElementById('hodArea');
+    area.innerHTML = `
+      <label>Subject Code</label><input id="hod_con_sub" placeholder="E.g. ECE501">
+      <div class="controls"><button onclick="hod.previewConsolidation()">Preview Consolidation</button> <button class="secondary" onclick="hod.renderMain()">Back</button></div>
+    `;
+  },
+
+  previewConsolidation(){
+    const subj = document.getElementById('hod_con_sub').value.trim();
+    if(!subj) return alert('Enter subject code');
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    const block = marks.IAT1[subj] || marks.IAT2[subj] || null;
+    if(!block) return alert('Not generated yet');
+    preview.openConsolidation(subj, block, block.meta || {});
+  },
+
+  showProgress(){
+    const area = document.getElementById('hodArea');
+    area.innerHTML = `<label>Student ID</label><input id="hod_prog_sid" placeholder="R24EC001"><div class="controls"><button onclick="hod.previewProgress()">Preview</button> <button class="secondary" onclick="hod.renderMain()">Back</button></div>`;
+  },
+
+  previewProgress(){
+    const sid = document.getElementById('hod_prog_sid').value.trim();
+    if(!sid) return alert('Enter student id');
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    const found = [];
+    ['IAT1','IAT2'].forEach(ex=>{
+      Object.keys(marks[ex]||{}).forEach(sub=>{
+        if(marks[ex][sub].students && marks[ex][sub].students[sid]) found.push({ exam: ex, subject: sub, block: marks[ex][sub] });
+      });
+    });
+    if(!found.length) return alert('Not generated yet');
+    preview.openProgress(sid, found);
+  },
+
+  showMappings(){
+    const area = document.getElementById('hodArea');
+    const subjects = util.load('subjects', []);
+    const staff = util.load('staffUsers', []);
+    area.innerHTML = `
+      <h4>Subject Handling Map</h4>
+      <div class="form-grid">
+        <div><label>Year</label><select id="map_year"><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+        <div><label>Semester</label><select id="map_sem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Degree</label><select id="map_deg"><option>B.E.</option><option>B.Tech</option></select></div>
+        <div><label>Branch</label><select id="map_branch"><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select></div>
+      </div>
+      <div>
+        <label>Subject</label>
+        <select id="map_subject"><option value="">Select year/sem/branch first</option></select>
+      </div>
+      <div>
+        <label>Staff</label>
+        <select id="map_staff">${staff.map(s=>`<option value="${s.staffId}">${s.staffId} - ${s.name}</option>`).join('')}</select>
+      </div>
+      <div class="controls">
+        <button onclick="hod.assignMapping()">Assign</button>
+        <button class="secondary" onclick="hod.renderMappingList()">Show Mappings</button>
+        <button class="secondary" onclick="hod.renderMain()">Back</button>
+      </div>
+      <div id="mappingList" style="margin-top:12px"></div>
+    `;
+    // populate subject options on change
+    ['map_year','map_sem','map_branch','map_deg'].forEach(id=>document.getElementById(id).addEventListener('change', hod.populateSubjects));
+    hod.populateSubjects();
+    hod.renderMappingList();
+  },
+
+  populateSubjects(){
+    const year = document.getElementById('map_year').value;
+    const sem = document.getElementById('map_sem').value;
+    const branch = document.getElementById('map_branch').value;
+    const deg = document.getElementById('map_deg').value;
+    const subs = util.load('subjects', []).filter(s=>s.year===year && s.semester===sem && s.branch===branch && s.degree===deg);
+    const sel = document.getElementById('map_subject');
+    sel.innerHTML = subs.length ? subs.map(s=>`<option value="${s.code}">${s.code} - ${s.name}</option>`).join('') : '<option value="">No subjects</option>';
+  },
+
+  assignMapping(){
+    const year = document.getElementById('map_year').value;
+    const sem = document.getElementById('map_sem').value;
+    const deg = document.getElementById('map_deg').value;
+    const branch = document.getElementById('map_branch').value;
+    const subjectCode = document.getElementById('map_subject').value;
+    const staffId = document.getElementById('map_staff').value;
+    if(!subjectCode || !staffId) return alert('Choose subject & staff');
+    const maps = util.load('mappings', []);
+    if(maps.find(m=>m.subjectCode===subjectCode && m.year===year && m.semester===sem && m.degree===deg && m.branch===branch && m.staffId===staffId)){
+      return alert('Mapping exists');
+    }
+    maps.push({ id: util.uid('map'), subjectCode, year, semester:sem, degree:deg, branch, staffId, assignedBy: session.get()?.id || 'HOD', assignedAt: util.now() });
+    util.save('mappings', maps);
+    util.pushLog(session.get()?.id||'HOD','HOD','ASSIGN_MAPPING',`Assigned ${subjectCode} to ${staffId}`);
+    alert('Mapping saved');
+    this.renderMappingList();
+  },
+
+  renderMappingList(){
+    const maps = util.load('mappings', []);
+    const subs = util.load('subjects', []);
+    const staff = util.load('staffUsers', []);
+    const el = document.getElementById('mappingList');
+    if(!maps.length){ el.innerHTML = '<div class="muted">No mappings</div>'; return; }
+    let html = '<table><thead><tr><th>Year</th><th>Sem</th><th>Degree</th><th>Branch</th><th>Subject</th><th>Staff</th><th>Actions</th></tr></thead><tbody>';
+    maps.forEach(m=>{
+      const s = subs.find(x=>x.code===m.subjectCode) || { name: '' };
+      const st = staff.find(x=>x.staffId===m.staffId) || { name: m.staffId };
+      html += `<tr><td>${m.year}</td><td>${m.semester}</td><td>${m.degree}</td><td>${m.branch}</td><td>${m.subjectCode} - ${s.name}</td><td>${m.staffId} - ${st.name}</td><td><button onclick="hod.editMapping('${m.id}')">Edit</button> <button class="danger" onclick="hod.removeMapping('${m.id}')">Remove</button></td></tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  },
+
+  editMapping(id){
+    const maps = util.load('mappings', []);
+    const idx = maps.findIndex(m=>m.id===id);
+    if(idx===-1) return alert('Not found');
+    const newStaff = prompt('Enter new staffId', maps[idx].staffId);
+    if(newStaff===null) return;
+    maps[idx].staffId = newStaff.trim();
+    util.save('mappings', maps);
+    util.pushLog(session.get()?.id||'HOD','HOD','EDIT_MAPPING',`Edited ${id}`);
+    this.renderMappingList();
+  },
+
+  removeMapping(id){
+    if(!confirm('Remove mapping?')) return;
+    let maps = util.load('mappings', []);
+    maps = maps.filter(m=>m.id!==id);
+    util.save('mappings', maps);
+    util.pushLog(session.get()?.id||'HOD','HOD','REMOVE_MAPPING',`Removed ${id}`);
+    this.renderMappingList();
+  },
+
+  showSubjects(){
+    const area = document.getElementById('hodArea');
+    area.innerHTML = `
+      <h4>Subjects (Add / Edit / Remove)</h4>
+      <div class="form-grid">
+        <div><label>Subject Code</label><input id="sub_code"></div>
+        <div><label>Subject Name</label><input id="sub_name"></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Year</label><select id="sub_year"><option>I</option><option>II</option><option>III</option><option>IV</option></select></div>
+        <div><label>Semester</label><select id="sub_sem"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Degree</label><select id="sub_deg"><option>B.E.</option><option>B.Tech</option></select></div>
+        <div><label>Branch</label><select id="sub_branch"><option>CSE</option><option>ECE</option><option>EEE</option><option>Mech</option><option>Civil</option><option>AI&DS</option></select></div>
+      </div>
+      <div class="controls"><button onclick="hod.addSubject()">Add Subject</button> <button class="secondary" onclick="hod.renderSubjectList()">Refresh List</button></div>
+      <div id="subjectList" style="margin-top:12px"></div>
+    `;
+    hod.renderSubjectList();
+  },
+
+  addSubject(){
+    const code = document.getElementById('sub_code').value.trim();
+    const name = document.getElementById('sub_name').value.trim();
+    const year = document.getElementById('sub_year').value;
+    const sem = document.getElementById('sub_sem').value;
+    const deg = document.getElementById('sub_deg').value;
+    const branch = document.getElementById('sub_branch').value;
+    if(!code || !name){ alert('Enter code & name'); return; }
+    const subs = util.load('subjects', []);
+    if(subs.find(s=>s.code===code && s.year===year && s.semester===sem && s.degree===deg && s.branch===branch)){ alert('Subject exists for this context'); return; }
+    subs.push({ code, name, year, semester:sem, degree:deg, branch, createdAt:util.now() });
+    util.save('subjects', subs);
+    util.pushLog(session.get()?.id||'HOD','HOD','ADD_SUBJECT',`${code}`);
+    hod.renderSubjectList();
+    alert('Subject added');
+  },
+
+  renderSubjectList(){
+    const subs = util.load('subjects', []);
+    const el = document.getElementById('subjectList');
+    if(!subs.length) { el.innerHTML = '<div class="muted">No subjects</div>'; return; }
+    let html = '<table><thead><tr><th>Code</th><th>Name</th><th>Year</th><th>Sem</th><th>Degree</th><th>Branch</th><th>Actions</th></tr></thead><tbody>';
+    subs.forEach((s, idx)=>{
+      html += `<tr><td>${s.code}</td><td>${s.name}</td><td>${s.year}</td><td>${s.semester}</td><td>${s.degree}</td><td>${s.branch}</td><td><button onclick="hod.editSubject(${idx})">Edit</button> <button class="danger" onclick="hod.removeSubject(${idx})">Remove</button></td></tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  },
+
+  editSubject(idx){
+    const subs = util.load('subjects', []);
+    const s = subs[idx];
+    const name = prompt('Subject Name', s.name);
+    if(name===null) return;
+    const code = prompt('Subject Code', s.code);
+    if(code===null) return;
+    s.name = name.trim()||s.name; s.code = code.trim()||s.code;
+    subs[idx] = s;
+    util.save('subjects', subs);
+    util.pushLog(session.get()?.id||'HOD','HOD','EDIT_SUBJECT',`${s.code}`);
+    hod.renderSubjectList();
+  },
+
+  removeSubject(idx){
+    if(!confirm('Remove subject and associated mappings/marks?')) return;
+    const subs = util.load('subjects', []);
+    const removed = subs.splice(idx,1)[0];
+    util.save('subjects', subs);
+    // remove mappings & marks related
+    let maps = util.load('mappings', []);
+    maps = maps.filter(m=>m.subjectCode !== removed.code || m.year!==removed.year || m.semester!==removed.semester || m.branch!==removed.branch || m.degree!==removed.degree);
+    util.save('mappings', maps);
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    ['IAT1','IAT2'].forEach(ex=>{
+      if(marks[ex] && marks[ex][removed.code]) delete marks[ex][removed.code];
+    });
+    util.save('marks', marks);
+    util.pushLog(session.get()?.id||'HOD','HOD','REMOVE_SUBJECT',removed.code);
+    hod.renderSubjectList();
+    alert('Removed subject and related data');
+  },
+
+  showLogs(){
+    const logs = util.load('activityLog', []);
+    const area = document.getElementById('hodArea');
+    if(!logs.length){ area.innerHTML='<div class="muted">No logs</div>'; return; }
+    let html = '<h4>Activity Log (most recent first)</h4>';
+    html += '<table><thead><tr><th>Time</th><th>User</th><th>Role</th><th>Action</th><th>Details</th></tr></thead><tbody>';
+    logs.forEach(l=> html += `<tr><td>${l.timestamp}</td><td>${l.userId}</td><td>${l.role}</td><td>${l.action}</td><td>${l.details}</td></tr>`);
+    html += '</tbody></table>';
+    area.innerHTML = html;
+  }
+};
+
+/* --------------------
+   Faculty behavior & UI
+   -------------------- */
+const faculty = {
+  exam: 'IAT1',
+  setExam(){ this.exam = document.getElementById('faculty_exam').value; this.renderMain(); },
+
+  renderMain(){
+    // show assigned subjects list
+    const s = session.get();
+    if(!s) return nav.back();
+    const staffId = s.id;
+    const maps = util.load('mappings', []).filter(m=>m.staffId === staffId);
+    const subs = util.load('subjects', []);
+    const area = document.getElementById('facultyArea');
+    if(!maps.length){ area.innerHTML = '<div class="muted">No subjects assigned. Contact HOD.</div>'; return; }
+    // Set faculty welcome title on dashboard
+    const loggedInFaculty = util.load('staffUsers', []).find(f => f.staffId === staffId);
+    document.getElementById("facultyTitle").innerText = "Faculty Dashboard — Welcome " + (loggedInFaculty?.name?.toUpperCase() || "FACULTY");
+    let html = '<h4>Your Assigned Subjects</h4>';
+    html += '<table><thead><tr><th>Subject</th><th>Context</th><th>Actions</th></tr></thead><tbody>';
+    maps.forEach(m=>{
+      const subj = subs.find(x=>x.code===m.subjectCode) || { name: '(unknown)' };
+      html += `<tr><td>${m.subjectCode} - ${subj.name}</td><td>${m.year} / Sem ${m.semester} / ${m.branch} / ${m.degree}</td>
+        <td><button onclick="faculty.openEntry('${m.subjectCode}','${m.year}','${m.semester}','${m.degree}','${m.branch}')">Enter Marks</button>
+        <button onclick="faculty.preview('${m.subjectCode}')">Preview</button></td></tr>`;
+    });
+    html += '</tbody></table>';
+    area.innerHTML = html;
+  },
+
+  manageAssigned(){ this.renderMain(); },
+
+  openEntry(subjectCode, year, sem, degree, branch){
+    const area = document.getElementById('facultyArea');
+    area.innerHTML = `<h4>Enter Marks - ${subjectCode} (${year} Sem ${sem} - ${branch})</h4>
+      <div class="form-grid"><div><label>Academic Year</label><input id="meta_acyr" placeholder="2024-25"></div><div></div></div>
+      <div style="margin-top:8px"><button onclick="faculty.loadStudents('${subjectCode}','${year}','${sem}','${degree}','${branch}')">Load Students</button>
+      <button class="secondary" onclick="faculty.renderMain()">Back</button></div>
+      <div id="marksArea" style="margin-top:12px"></div>`;
+  },
+
+  loadStudents(subjectCode, year, sem, degree, branch){
+    const acyr = document.getElementById('meta_acyr').value || '';
+    const allStudents = util.load('studentUsers', []);
+    const students = allStudents.filter(st => st.year === year && String(st.semester) === String(sem) && st.branch === branch && st.degree === degree);
+    if(!students.length) { alert('No students for this selection'); return; }
+    // Build table with dropdowns
+    let html = '<div class="table-scroll"><table><thead><tr><th>RegNo</th><th>StudentID</th><th>Name</th><th>CT1 (0-20)</th><th>CT2 (0-20)</th><th>Assignment (0-15)</th><th>Seminar (0-10)</th><th>IAT (0-50)</th><th>Attendance (%)</th></tr></thead><tbody>';
+    students.forEach(st=>{
+      html += `<tr data-stu="${st.studentId}"><td>${st.regNo||''}</td><td>${st.studentId}</td><td>${st.name}</td>
+        <td>${faculty.mkSelect('ct1_'+st.studentId,20)}</td>
+        <td>${faculty.mkSelect('ct2_'+st.studentId,20)}</td>
+        <td>${faculty.mkSelect('asg_'+st.studentId,15)}</td>
+        <td>${faculty.mkSelect('sem_'+st.studentId,10)}</td>
+        <td>${faculty.mkSelect('iat_'+st.studentId,50)}</td>
+        <td>${faculty.mkSelect('att_'+st.studentId,100)}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+    html += `<div class="controls"><button onclick="faculty.resetSubjectMarks('${subjectCode}')">Reset Marks</button><button onclick="faculty.saveMarks('${subjectCode}','${acyr}','${year}','${sem}','${degree}','${branch}')">Save</button><button onclick="faculty.generatePreview('${subjectCode}','${acyr}','${year}','${sem}','${degree}','${branch}')">Generate Preview</button></div>`;
+    document.getElementById('marksArea').innerHTML = html;
+    // populate existing marks if any
+    const marksObj = util.load('marks', { IAT1:{}, IAT2:{} })[this.exam];
+    if(marksObj && marksObj[subjectCode] && marksObj[subjectCode].students){
+      const existing = marksObj[subjectCode].students;
+      students.forEach(st=>{
+        const sid = st.studentId;
+        if(existing[sid]){
+          document.getElementById('ct1_'+sid).value = existing[sid].ct1 || 0;
+          document.getElementById('ct2_'+sid).value = existing[sid].ct2 || 0;
+          document.getElementById('asg_'+sid).value = existing[sid].assignment || 0;
+          document.getElementById('sem_'+sid).value = existing[sid].seminar || 0;
+          document.getElementById('iat_'+sid).value = existing[sid].iat || 0;
+          document.getElementById('att_'+sid).value = existing[sid].attendance || 0;
+        }
+      });
+    }
+  },
+
+  mkSelect(id,max){
+    let s = `<select id="${id}">`;
+    for(let i=0;i<=max;i++) s += `<option value="${i}">${i}</option>`;
+    s += '</select>';
+    return s;
+  },
+
+  resetSubjectMarks(subjectCode){
+    if(!confirm('Reset marks for this subject and current exam?')) return;
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    delete marks[this.exam][subjectCode];
+    util.save('marks', marks);
+    util.pushLog(session.get()?.id||'FAC','FACULTY','RESET_MARKS', `${this.exam} ${subjectCode}`);
+    alert('Marks reset.');
+    this.renderMain();
+  },
+
+  saveMarks(subjectCode, acyr, year, sem, degree, branch){
+    const trows = [...document.querySelectorAll('#marksArea tbody tr')];
+    const studentsObj = {};
+    trows.forEach(tr=>{
+      const sid = tr.getAttribute('data-stu');
+      const ct1 = Number(document.getElementById('ct1_'+sid).value);
+      const ct2 = Number(document.getElementById('ct2_'+sid).value);
+      const asg = Number(document.getElementById('asg_'+sid).value);
+      const semVal = Number(document.getElementById('sem_'+sid).value);
+      const iat = Number(document.getElementById('iat_'+sid).value);
+      const att = Number(document.getElementById('att_'+sid).value);
+      studentsObj[sid] = { ct1, ct2, assignment: asg, seminar: semVal, iat, attendance: att };
+    });
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    marks[this.exam][subjectCode] = { meta: { acyr, year, semester:sem, degree, branch, subjectCode, examType:this.exam }, students: studentsObj, savedBy: session.get()?.id||'unknown', savedAt: util.now() };
+    util.save('marks', marks);
+    util.pushLog(session.get()?.id||'FACULTY','FACULTY','SAVE_MARKS', `${this.exam} ${subjectCode} saved`);
+    alert('Marks saved.');
+  },
+
+  compute(raw){
+    // raw: { ct1, ct2, assignment, seminar, iat, attendance }
+    const ctAvg = (Number(raw.ct1||0) + Number(raw.ct2||0))/2;
+    const ctPct = (ctAvg/20)*100;
+    const assPct = (Number(raw.assignment||0)/15)*100;
+    const semPct = (Number(raw.seminar||0)/10)*100;
+    const iatPct = (Number(raw.iat||0)/50)*100;
+    let final = (ctPct + assPct + semPct + iatPct)/4;
+    let boosted = false;
+    if(final < 75 && Number(raw.attendance||0) >= 90){
+      final = Math.min(100, final + 25);
+      boosted = true;
+    }
+    return { ctPct, assPct, semPct, iatPct, final, boosted, attendance: raw.attendance||0 };
+  },
+
+  generatePreview(subjectCode, acyr, year, sem, degree, branch){
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} })[this.exam];
+    const block = marks ? marks[subjectCode] : null;
+    if(!block) return alert('No marks saved for this subject/exam');
+    preview.openConsolidation(subjectCode, block, block.meta || {});
+    util.pushLog(session.get()?.id||'FACULTY','FACULTY','GENERATE_PREVIEW',`${this.exam} ${subjectCode}`);
+  },
+
+  preview(subjectCode){
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} })[this.exam];
+    const block = marks ? marks[subjectCode] : null;
+    if(!block) return alert('No marks saved for this subject/exam');
+    preview.openConsolidation(subjectCode, block, block.meta || {});
+  },
+
+  showProgress(){
+    const area = document.getElementById('facultyArea');
+    area.innerHTML = `<label>Student ID</label><input id="faculty_prog_sid" placeholder="R24EC001"><div class="controls"><button onclick="faculty.previewProgress()">Preview</button> <button class="secondary" onclick="faculty.renderMain()">Back</button></div>`;
+  },
+
+  previewProgress(){
+    const sid = document.getElementById('faculty_prog_sid').value.trim();
+    if(!sid) return alert('Enter student id');
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} });
+    const found = [];
+    ['IAT1','IAT2'].forEach(ex=>{
+      Object.keys(marks[ex]||{}).forEach(sub=>{
+        if(marks[ex][sub].students && marks[ex][sub].students[sid]) found.push({ exam: ex, subject: sub, block: marks[ex][sub] });
+      });
+    });
+    if(!found.length) return alert('Not generated yet');
+    preview.openProgress(sid, found);
+  },
+
+  showActivityLog(){
+    const logs = util.load('activityLog', []);
+    const area = document.getElementById('facultyArea');
+    if(!logs.length){ area.innerHTML = '<div class="muted">No logs</div>'; return; }
+    let html = '<h4>Your Activity Log (most recent)</h4>';
+    html += '<table><thead><tr><th>Time</th><th>Action</th><th>Details</th></tr></thead><tbody>';
+    logs.filter(l => l.userId === session.get().id).forEach(l => html += `<tr><td>${l.timestamp}</td><td>${l.action}</td><td>${l.details}</td></tr>`);
+    html += '</tbody></table>';
+    area.innerHTML = html;
+  }
+};
+
+/* --------------------
+   Student behavior & UI
+   -------------------- */
+const student = {
+  renderMain() {
+  const sid = session.get()?.id;
+  const loggedInStudent = util.load('studentUsers', []).find(s => s.studentId === sid);
+  document.querySelector('#student h3').innerText = "Student Dashboard — Welcome " + (loggedInStudent?.name?.toUpperCase() || "STUDENT");
+    document.getElementById('studentArea').innerHTML = '<div class="muted">Use buttons to view progress or internal marks.</div>';
+},
+
+
+  viewProgress(){
+    const sid = session.get()?.id;
+    if(!sid) return alert('Not logged in');
+    const exam = document.getElementById('student_exam').value;
+    const marks = util.load('marks', { IAT1:{}, IAT2:{} })[exam];
+    const found = [];
+    for(const subj of Object.keys(marks || {})){
+      if(marks[subj].students && marks[subj].students[sid]) found.push({ subject: subj, block: marks[subj] });
+    }
+    if(!found.length) return alert('No progress generated yet');
+    preview.openProgress(sid, found);
+  },
+
+  viewUniversityInternal(){
+    const sid = session.get()?.id;
+    if(!sid) return alert('Not logged in');
+    // compute internals across subjects
+    const marksAll = util.load('marks', { IAT1:{}, IAT2:{} });
+    const subjects = Array.from(new Set(Object.keys(marksAll.IAT1 || {}).concat(Object.keys(marksAll.IAT2 || {}))));
+    const rows = [];
+    const subsMeta = util.load('subjects', []);
+    subjects.forEach(sc => {
+      const b1 = marksAll.IAT1[sc]; const b2 = marksAll.IAT2[sc];
+      const i1Pct = b1 && b1.students && b1.students[sid] ? (b1.students[sid].iat/50)*100 : null;
+      const i2Pct = b2 && b2.students && b2.students[sid] ? (b2.students[sid].iat/50)*100 : null;
+      const avail = [i1Pct,i2Pct].filter(x=>x!==null);
+      if(!avail.length) return;
+      const avg = (avail.reduce((a,b)=>a+b,0))/avail.length;
+      const internal40 = (avg*0.4).toFixed(2);
+      const expectedExternal60 = (50 - internal40); // minimum to pass (out of 60)
+      const expectedExternal100 = (expectedExternal60 / 60 * 100).toFixed(2);
+      const subjName = (subsMeta.find(x=>x.code===sc)||{name:sc}).name;
+      rows.push({ subjectCode: sc, subjectName: subjName, internal40, expectedExternal100});
+    });
+    if(!rows.length) return alert('No internal marks available');
+    // show print preview
+    const win = window.open('', '_blank', 'width=900,height=700');
+    let html = `<html><head><title>PROGRESS CARD REPORT</title><style>table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:center}.header-row{display:flex;justify-content:space-between;margin-bottom:10px}@media print{#printBtn{display:none}}</style></head><body><div style="text-align:center;margin-bottom:10px;"><img src="logo.png" style="height:80px;"><br><h2>V V COLLEGE OF ENGINEERING</h2><p>V V Nagar, Tisayanvilai, Tirunelveli District, Tamil Nadu - 627657</p><p>(Approved by AICTE, New Delhi and Affiliated to Anna University, Chennai)</p><p>Telephone: 04637 - 273312-15 (4 LINES), 273412, 272467</p><p>Email: info@vvcoe.org | Website: www.vvcoe.org</p><h3>UNIVERSITY INTERNAL RESULTS</h3></div>`;
+    html += `<table border="1" style="width:100%;border-collapse:collapse"><thead><tr><th>Subject</th><th>Subject Name</th><th>Internal (40%)</th><th>Expected External Marks (100)</th></tr></thead><tbody>`;
+    rows.forEach(r=> html += `<tr><td>${r.subjectCode}</td><td>${r.subjectName}</td><td>${r.internal40}</td><td>${r.expectedExternal100}</td></tr>`);
+    html += `</tbody></table><div style="text-align:center;margin-top:12px"><button onclick="window.print()">Print</button></div></body></html>`;
+    win.document.write(html); win.document.close();
+  }
+};
+
+/* --------------------
+   Previews: consolidation and progress
+   -------------------- */
+const preview = {
+  openConsolidation(subjectCode, block, meta){
+    const studentsData = util.load('studentUsers', []);
+    const subs = util.load('subjects', []);
+    const subj = subs.find(s => s.code === subjectCode) || { name: subjectCode };
+    const rows = [];
+    for(const sid of Object.keys(block.students || {})){
+      const raw = block.students[sid];
+      const comp = faculty.compute(raw);
+      const studentMeta = studentsData.find(x=>x.studentId===sid) || { name:'', regNo:'' };
+      rows.push({ regNo: studentMeta.regNo || '', studentId: sid, name: studentMeta.name || '', ct: comp.ctPct, ass: comp.assPct, sem: comp.semPct, iat: comp.iatPct, att: comp.attendance, final: comp.final, boosted: comp.boosted });
+    }
+    const win = window.open('','_blank','width=1000,height=800');
+    let html=`<html><head><title>CONSOLIDATION MARKSHEET</title><style>table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px}th{background:#f2f2f2}.header-row{display:flex;justify-content:space-between;margin-bottom:10px}.sign-row{display:flex;gap:24px;justify-content:space-around;margin-top:40px;text-align:center;font-weight:600}button#printBtn{padding:8px 18px;border-radius:6px;background:#007bff;color:white;border:none;cursor:pointer;font-weight:600}button#printBtn:hover{background:#0056b3}@media print{#printBtn{display:none!important}}</style></head><body><div style="text-align:center;margin-bottom:10px;"><img src="logo.png" style="height:80px;"><br><h2 style="margin:4px 0;">V V COLLEGE OF ENGINEERING</h2><p style="margin:2px 0;">V V Nagar, Tisayanvilai, Tirunelveli District, Tamil Nadu - 627657</p><p style="margin:2px 0;">(Approved by AICTE, New Delhi and Affiliated to Anna University, Chennai)</p><p style="margin:2px 0;">Telephone: 04637 - 273312-15 (4 LINES), 273412, 272467</p><p style="margin:2px 0;">Email: info@vvcoe.org | Website: www.vvcoe.org</p><h3 style="margin-top:8px;">CONSOLIDATION MARKSHEET REPORT</h3></div><hr><div class="header-row"><div><strong>Year/Semester:</strong> ${meta.year||''} / ${meta.semester||''}</div><div><strong>Subject Code/Name:</strong> ${subjectCode} / ${subj.name}</div><div><strong>Degree/Branch:</strong> ${meta.degree||''} / ${meta.branch||''}</div></div><div style="margin-bottom:10px;"><strong>Academic Year:</strong> ${meta.acyr||''} | <strong>Exam:</strong> ${meta.examType||''}</div><table><thead><tr><th>Register Number</th><th>Student ID</th><th>Name of the Student</th><th>Cycle Test</th><th>Assignment</th><th>Seminar</th><th>IAT Exam</th><th>Attendance</th><th>Final Score</th></tr></thead><tbody>`;rows.forEach(r=>{html+=`<tr><td>${r.regNo}</td><td>${r.studentId}</td><td>${r.name}</td><td>${r.ct.toFixed(2)}</td><td>${r.ass.toFixed(2)}</td><td>${r.sem.toFixed(2)}</td><td>${r.iat.toFixed(2)}</td><td>${r.att}</td><td>${r.final.toFixed(2)}${r.boosted?' *':''}</td></tr>`});html+=`</tbody></table><div class="sign-row"><div>__________________________<br>Principal</div><div>__________________________<br>HOD</div><div>__________________________<br>Class Advisor</div><div>__________________________<br>Incharge</div></div><div style="text-align:center;margin-top:500px;"><button id="printBtn" onclick="window.print()">Print</button></div></body></html>`;
+    win.document.write(html);win.document.close();
+  },  
+
+  openProgress(studentId, foundBlocks){
+    const students = util.load('studentUsers', []);
+    const subsMeta = util.load('subjects', []);
+    const stu = students.find(s => s.studentId === studentId) || { name: '', regNo:'', year:'', semester:'', degree:'', branch:'', acyr:'' };
+    let rowsHtml = ''; const finals = [];
+    let examType = '';
+    foundBlocks.forEach(item => {
+      if(item.block && item.block.examType) examType = item.block.examType;
+      const subjCode = item.subject;
+      const raw = item.block.students[studentId];
+      if(!raw) return;
+      const comp = faculty.compute(raw);
+      finals.push(comp.final);
+      const subjName = (subsMeta.find(x=>x.code===subjCode)||{name:subjCode}).name;
+      rowsHtml += `<tr><td>${subjCode}</td><td>${subjName}</td><td>${comp.ctPct.toFixed(2)}</td><td>${comp.assPct.toFixed(2)}</td><td>${comp.semPct.toFixed(2)}</td><td>${comp.iatPct.toFixed(2)}</td><td>${comp.attendance}</td><td>${comp.final.toFixed(2)}${comp.boosted?' *':''}</td><td>${preview.remark(comp.final)}</td></tr>`;
+    });
+    const overall = preview.overall(finals);
+    const win = window.open('','_blank','width=1000,height=800');
+    let html = `<html><head><title>Progress Card - ${studentId}</title><style>@media print{button{display:none}}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:center}</style></head><body><div style="text-align:center;margin-bottom:10px;"><img src="logo.png" style="height:80px;"><br><h2>V V COLLEGE OF ENGINEERING</h2><p>V V Nagar, Tisayanvilai, Tirunelveli District, Tamil Nadu - 627657</p><h3>${examType ? examType.toUpperCase() : 'INTERNAL ASSESSMENT TEST'} - PROGRESS CARD</h3></div><hr><table style="width:100%;border-collapse:collapse;margin-bottom:10px;"><tr><td><strong>Name:</strong> ${stu.name||''}</td><td><strong>Register Number:</strong> ${stu.regNo||''}</td><td><strong>Student ID:</strong> ${studentId||''}</td></tr><tr><td><strong>Year/Semester:</strong> ${stu.year||''} / ${stu.semester||''}</td><td><strong>Degree/Branch:</strong> ${stu.degree||''} / ${stu.branch||''}</td><td><strong>Academic Year:</strong> ${stu.acyr||''}</td></tr></table><table><thead><tr><th>Subject Code</th><th>Subject Name</th><th>CT%</th><th>Assignment%</th><th>Sem%</th><th>IAT%</th><th>Attendance</th><th>Final%</th><th>Remarks</th></tr></thead><tbody>${rowsHtml}</tbody></table><div style="margin-top:10px"><strong>Overall Remarks:</strong> ${overall}</div><div style="display:flex;gap:16px;justify-content:space-around;margin-top:20px"><div>Principal<br><div style="border-top:1px solid #333;margin-top:40px"></div></div><div>HOD<br><div style="border-top:1px solid #333;margin-top:40px"></div></div><div>Class Advisor<br><div style="border-top:1px solid #333;margin-top:40px"></div></div><div>Parents<br><div style="border-top:1px solid #333;margin-top:40px"></div></div></div><div style="text-align:center;margin-top:12px"><button onclick="window.print()">Print</button></div></body></html>`;
+    win.document.write(html); win.document.close();
+  },
+  remark(finalScore){
+    if(finalScore === 100) return 'Centum Result';
+    if(finalScore > 90) return 'Outstanding';
+    if(finalScore > 80) return 'Excellent';
+    if(finalScore > 75) return 'Very Good';
+    if(finalScore > 50) return 'Fair! need improvement';
+    return 'Failed';
+  },
+
+  overall(finals){
+    if(!finals.length) return 'No subjects';
+    const avg = finals.reduce((a,b)=>a+b,0)/finals.length;
+    if(finals.some(f => f<50)) return 'Failed in certain subjects, need improvement';
+    if(avg > 90) return 'Outstanding overall';
+    if(avg > 80) return 'Excellent overall';
+    if(avg >= 50) return 'Fair overall, needs improvement';
+    return 'Overall needs improvement';
+  }
+};
+
+  function exportlocalStorage() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        data[key] = localStorage.getItem(key);
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'localStorageBackup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('Local Storage exported successfully.');
+}
+
+  function importlocalStorage() {
+    document.getElementById('importFile').click();
+}
+
+  function handleImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            let overwriteCount = 0, newCount = 0;
+            for (const key in importedData) {
+                if (localStorage.getItem(key) !== null) overwriteCount++;
+                else newCount++;
+                localStorage.setItem(key, importedData[key]);
+            }
+            if (overwriteCount) alert(overwriteCount + " existing data overwritten.");
+            if (newCount) alert(newCount + " new data imported successfully.");
+        } catch (err) {
+            alert('Invalid file format or corrupted data.');
+        }
+    };
+    reader.readAsText(file);
+}
+/* --------------------
+   Initialize UI based on session
+   -------------------- */
+(function init(){
+  util.ensure();
+  // show initial or restore session
+  const s = session.get();
+  if(!s){ nav.back(); return; }
+  if(s.role === 'HOD'){ nav.showHOD(); hod.renderMain(); return; }
+  if(s.role === 'FACULTY'){ nav.showFaculty(); faculty.renderMain(); return; }
+  if(s.role === 'STUDENT'){ nav.showStudent(); student.renderMain(); return; }
+})();
+
+/* Expose some functions to window for inline onclick usage */
+window.nav = nav;
+window.auth = auth;
+window.ui = ui;
+window.hod = hod;
+window.faculty = faculty;
+window.student = student;
+window.util = util;
+window.data = data;
+window.preview = preview;
+</script>
+</body>
+</html>
